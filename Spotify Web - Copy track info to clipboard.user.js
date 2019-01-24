@@ -2,11 +2,10 @@
 // @name          Spotify Web - Copy track info to clipboard
 // @description   Adds an entry in the context menu that copies the selected song name and artist to the clipboard
 // @namespace     https://openuserjs.org/users/cuzi
-// @updateURL     https://openuserjs.org/meta/cuzi/Spotify_Web_-_Copy_track_info_to_clipboard.meta.js
-// @version       1
+// @version       2
 // @license       MIT
 // @copyright     2017, cuzi (https://openuserjs.org/users/cuzi)
-// @require       https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js
+// @require       https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js
 // @grant         GM.setClipboard
 // @grant         GM_setClipboard
 // @include       https://open.spotify.com/*
@@ -30,9 +29,11 @@
       }
     }
     
-    title_text = $(".track-info__name").text();
-    if(title_text && title_text.trim()) {
-      return title_text.trim();
+    if($(".track-info__name")) {
+      title_text = $(".track-info__name")[0].innerText;
+      if(title_text && title_text.trim()) {
+        return title_text.trim();
+      }
     }
     
     return "";
@@ -46,6 +47,21 @@
       if(artist_text && artist_text.trim()) {
         return artist_text.trim();
       }
+      
+      // In playlist:
+      if($artistnodes.find(".ellipsis-one-line").length > 0) {
+        artist_text = $artistnodes.find(".ellipsis-one-line")[0].innerText;
+        if(artist_text && artist_text.trim()) {
+          return artist_text.trim();
+        }
+      }
+      
+      // Something else, just accumulate all artist links: <a href="/artist/ARTISTID">Artistname</a>
+      if($artistnodes.find('a[href^="/artist/"]').length > 0) {
+        return $.map($artistnodes.find('a[href^="/artist/"]'), (element) => $(element).text().trim()).join(", ");
+      }
+         
+      
     }
     
     if(document.location.pathname.startsWith("/artist/")) {
@@ -61,11 +77,14 @@
         return artist_text.trim();
       } 
     }
-       
-    artist_text = $(".track-info__artists").text();
-    if(artist_text && artist_text.trim()) {
-      return artist_text.trim();
+    
+    if($(".track-info__artists")) {
+      artist_text = $(".track-info__artists")[0].innerText;
+      if(artist_text && artist_text.trim()) {
+        return artist_text.trim();
+      }
     }
+    
     
     return "";
   };
@@ -76,6 +95,20 @@
     let menu = $(".react-contextmenu--visible")
     let title = $this.find(".tracklist-name");
     let artist = $this.find(".artists-album span");
+    if(artist.length === 0) {
+      if($this.find(".second-line").length !== 0) {
+      	artist = $this.find(".second-line"); // in playlist
+      }
+      
+      if($this.parents(".now-playing").length !== 0) {
+        // Now playing bar
+        $this = $($this.parents(".now-playing")[0]);
+				if($this.find(".track-info__artists").length !== 0) {
+        	artist = $this.find(".track-info__artists");
+      	} 
+      }
+      
+    }
 
     if (title && artist && menu[0]) {
       let title_text = getSongTitle(title);
@@ -99,6 +132,7 @@
             GM.setClipboard(s);
           }
           alert("Copied:\n" + s);
+          window.dispatchEvent(new window.CustomEvent('REACT_CONTEXTMENU_HIDE'));
         }); 
       }
       entry.data("gmcopy", artist_text + " - " + title_text);
@@ -118,7 +152,9 @@
     $(".react-contextmenu-wrapper").unbind(".gmcopytrackinfo").bind("contextmenu.gmcopytrackinfo", onContextMenu);
 
   };
+  
+  window.setTimeout(bindEvents, 500);
 
-  window.setInterval(bindEvents, 4000);
+  window.setInterval(bindEvents, 3000);
 
 })();
