@@ -2,7 +2,7 @@
 // @name          Spotify Web - Copy track info to clipboard
 // @description   Adds an entry in the context menu that copies the selected song name and artist to the clipboard
 // @namespace     https://openuserjs.org/users/cuzi
-// @version       3
+// @version       4
 // @license       MIT
 // @copyright     2017, cuzi (https://openuserjs.org/users/cuzi)
 // @require       https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js
@@ -24,8 +24,8 @@
   const showInfo = function (str) {
     window.clearTimeout(showInfoID)
     if (!document.getElementById('copied_song_info_outer')) {
-      document.head.appendChild(document.createElement('style')).innerHTML = '#copied_song_info_outer {z-index: 100;margin: -62px auto 0;padding-bottom: 62px;pointer-events: none;display: inline-block;}#copied_song_info_inner {max-width: none;display: inline-block;background: #2e77d0;border-radius: 8px;box-shadow: 0 4px 12px 4px rgba(0,0,0,.5);color: #fff;font-size: 16px;line-height: 20px;max-width: 450px;opacity: 1;padding: 12px 36px;text-align: center;transition: none .5s cubic-bezier(.3,0,.4,1);transition-property: opacity;}'
-      $('<div id="copied_song_info_outer"><div id="copied_song_info_inner"></div></div>').appendTo('.Root__main-view')
+      document.head.appendChild(document.createElement('style')).innerHTML = '#copied_song_info_outer {z-index: 100;height:0;margin: -62px auto 0;padding-bottom: 62px;pointer-events: none;display: inline-block;}#copied_song_info_inner {max-width: none;display: inline-block;background: #2e77d0;border-radius: 8px;box-shadow: 0 4px 12px 4px rgba(0,0,0,.5);color: #fff;font-size: 16px;line-height: 20px;max-width: 450px;opacity: 1;padding: 12px 36px;text-align: center;transition: none .5s cubic-bezier(.3,0,.4,1);transition-property: opacity;}'
+      $('<div id="copied_song_info_outer"><div id="copied_song_info_inner"></div></div>').insertAfter('.Root__main-view>div:first-child')
     }
     const copiedSongInfoOuter = $('#copied_song_info_outer')
     const copiedSongInfoInner = $('#copied_song_info_inner')
