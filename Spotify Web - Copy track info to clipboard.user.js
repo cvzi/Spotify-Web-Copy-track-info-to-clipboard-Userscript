@@ -2,10 +2,10 @@
 // @name          Spotify Web - Copy track info to clipboard
 // @description   Adds an entry in the context menu that copies the selected song name and artist to the clipboard
 // @namespace     https://openuserjs.org/users/cuzi
-// @version       2
+// @version       3
 // @license       MIT
 // @copyright     2017, cuzi (https://openuserjs.org/users/cuzi)
-// @require       https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js
+// @require       https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js
 // @grant         GM.setClipboard
 // @grant         GM_setClipboard
 // @include       https://open.spotify.com/*
@@ -15,146 +15,160 @@
 // @author       cuzi
 // ==/OpenUserJS==
 
-"use strict";
+/* globals $, GM, GM_setClipboard */
+
+'use strict';
 
 (function () {
-  
-  let getSongTitle = function ($titlenodes) {
-    let title_text;
-    
-    if($titlenodes) {
-      title_text = $titlenodes.text();
-      if(title_text && title_text.trim()) {
-        return title_text.trim();
+  let showInfoID
+  const showInfo = function (str) {
+    window.clearTimeout(showInfoID)
+    if (!document.getElementById('copied_song_info_outer')) {
+      document.head.appendChild(document.createElement('style')).innerHTML = '#copied_song_info_outer {z-index: 100;margin: -62px auto 0;padding-bottom: 62px;pointer-events: none;display: inline-block;}#copied_song_info_inner {max-width: none;display: inline-block;background: #2e77d0;border-radius: 8px;box-shadow: 0 4px 12px 4px rgba(0,0,0,.5);color: #fff;font-size: 16px;line-height: 20px;max-width: 450px;opacity: 1;padding: 12px 36px;text-align: center;transition: none .5s cubic-bezier(.3,0,.4,1);transition-property: opacity;}'
+      $('<div id="copied_song_info_outer"><div id="copied_song_info_inner"></div></div>').appendTo('.Root__main-view')
+    }
+    const copiedSongInfoOuter = $('#copied_song_info_outer')
+    const copiedSongInfoInner = $('#copied_song_info_inner')
+
+    copiedSongInfoOuter.css('display', 'inline-block')
+    copiedSongInfoInner.css('opacity', 1)
+    copiedSongInfoInner.html(str.replace('\n', '<br>\n'))
+
+    showInfoID = window.setTimeout(function () {
+      copiedSongInfoInner.css('opacity', 0)
+      showInfoID = window.setTimeout(function () {
+        copiedSongInfoOuter.css('display', 'none')
+      }, 700)
+    }, 4000)
+  }
+
+  const getSongTitle = function ($titlenodes) {
+    let titleText
+
+    if ($titlenodes) {
+      titleText = $titlenodes.text()
+      if (titleText && titleText.trim()) {
+        return titleText.trim()
       }
     }
-    
-    if($(".track-info__name")) {
-      title_text = $(".track-info__name")[0].innerText;
-      if(title_text && title_text.trim()) {
-        return title_text.trim();
+
+    if ($('.track-info__name')) {
+      titleText = $('.track-info__name')[0].innerText
+      if (titleText && titleText.trim()) {
+        return titleText.trim()
       }
     }
-    
-    return "";
-  };
-  
-  let getArtistName = function ($artistnodes) {
-    let artist_text;
-    
-    if($artistnodes) {
-      artist_text = $artistnodes.not((i, e) => e.className).text();
-      if(artist_text && artist_text.trim()) {
-        return artist_text.trim();
+
+    return ''
+  }
+
+  const getArtistName = function ($artistnodes) {
+    let artistText
+
+    if ($artistnodes) {
+      artistText = $artistnodes.not((i, e) => e.className).text()
+      if (artistText && artistText.trim()) {
+        return artistText.trim()
       }
-      
+
       // In playlist:
-      if($artistnodes.find(".ellipsis-one-line").length > 0) {
-        artist_text = $artistnodes.find(".ellipsis-one-line")[0].innerText;
-        if(artist_text && artist_text.trim()) {
-          return artist_text.trim();
+      if ($artistnodes.find('.ellipsis-one-line').length > 0) {
+        artistText = $artistnodes.find('.ellipsis-one-line')[0].innerText
+        if (artistText && artistText.trim()) {
+          return artistText.trim()
         }
       }
-      
+
       // Something else, just accumulate all artist links: <a href="/artist/ARTISTID">Artistname</a>
-      if($artistnodes.find('a[href^="/artist/"]').length > 0) {
-        return $.map($artistnodes.find('a[href^="/artist/"]'), (element) => $(element).text().trim()).join(", ");
-      }
-         
-      
-    }
-    
-    if(document.location.pathname.startsWith("/artist/")) {
-		  artist_text = $("header h1").text();
-      if(artist_text && artist_text.trim()) {
-        return artist_text.trim();
-      } 
-    }
-    
-    if(document.location.pathname.startsWith("/album/")) {
-		  artist_text = $(".media-object .mo-meta").text();
-      if(artist_text && artist_text.trim()) {
-        return artist_text.trim();
-      } 
-    }
-    
-    if($(".track-info__artists")) {
-      artist_text = $(".track-info__artists")[0].innerText;
-      if(artist_text && artist_text.trim()) {
-        return artist_text.trim();
+      if ($artistnodes.find('a[href^="/artist/"]').length > 0) {
+        return $.map($artistnodes.find('a[href^="/artist/"]'), (element) => $(element).text().trim()).join(', ')
       }
     }
-    
-    
-    return "";
-  };
 
-  let populateContextMenu = function (ev) {
-    let $this = $(this);
-
-    let menu = $(".react-contextmenu--visible")
-    let title = $this.find(".tracklist-name");
-    let artist = $this.find(".artists-album span");
-    if(artist.length === 0) {
-      if($this.find(".second-line").length !== 0) {
-      	artist = $this.find(".second-line"); // in playlist
+    if (document.location.pathname.startsWith('/artist/')) {
+      artistText = $('header h1').text()
+      if (artistText && artistText.trim()) {
+        return artistText.trim()
       }
-      
-      if($this.parents(".now-playing").length !== 0) {
+    }
+
+    if (document.location.pathname.startsWith('/album/')) {
+      artistText = $('.media-object .mo-meta').text()
+      if (artistText && artistText.trim()) {
+        return artistText.trim()
+      }
+    }
+
+    if ($('.track-info__artists')) {
+      artistText = $('.track-info__artists')[0].innerText
+      if (artistText && artistText.trim()) {
+        return artistText.trim()
+      }
+    }
+
+    return ''
+  }
+
+  const populateContextMenu = function (ev) {
+    let $this = $(this)
+
+    const menu = $('.react-contextmenu--visible')
+    const title = $this.find('.tracklist-name')
+    let artist = $this.find('.artists-album span')
+    if (artist.length === 0) {
+      if ($this.find('.second-line').length !== 0) {
+        artist = $this.find('.second-line') // in playlist
+      }
+      if ($this.parents('.now-playing').length !== 0) {
         // Now playing bar
-        $this = $($this.parents(".now-playing")[0]);
-				if($this.find(".track-info__artists").length !== 0) {
-        	artist = $this.find(".track-info__artists");
-      	} 
+        $this = $($this.parents('.now-playing')[0])
+        if ($this.find('.track-info__artists').length !== 0) {
+          artist = $this.find('.track-info__artists')
+        }
       }
-      
     }
 
     if (title && artist && menu[0]) {
-      let title_text = getSongTitle(title);
-      let artist_text = getArtistName(artist);
-      
-      if(!title_text || !artist_text) {
-        return; 
+      const titleText = getSongTitle(title)
+      const artistText = getArtistName(artist)
+
+      if (!titleText || !artistText) {
+        return
       }
-      
 
       // Create context menu entry
-      let entry = menu.find(".gmcopytrackinfo");
+      let entry = menu.find('.gmcopytrackinfo')
       if (!entry[0]) {
         entry = $('<div class="react-contextmenu-item gmcopytrackinfo" role="menuitem" tabindex="-1" aria-disabled="false">Copy track info</div>').appendTo(menu).click(function (ev) {
           // Copy string to clipboard
-          let s = entry.data("gmcopy");
+          const s = entry.data('gmcopy')
           if (typeof GM_setClipboard !== 'undefined') {
-            GM_setClipboard(s);
+            GM_setClipboard(s)
+          } else if (GM.setClipboard) {
+            GM.setClipboard(s)
           }
-          else if (GM.setClipboard) {
-            GM.setClipboard(s);
-          }
-          alert("Copied:\n" + s);
-          window.dispatchEvent(new window.CustomEvent('REACT_CONTEXTMENU_HIDE'));
-        }); 
+          showInfo('Copied:\n' + s)
+          window.dispatchEvent(new window.CustomEvent('REACT_CONTEXTMENU_HIDE'))
+        })
       }
-      entry.data("gmcopy", artist_text + " - " + title_text);
+      entry.data('gmcopy', artistText + ' - ' + titleText)
     }
-  };
+  }
 
-  let onContextMenu = function (ev) {
+  const onContextMenu = function (ev) {
     // Wait for the React context menu to open
-    let t = this;
+    const t = this
     window.setTimeout(function () {
-      populateContextMenu.call(t, ev);
-    }, 200);
-  };
+      populateContextMenu.call(t, ev)
+    }, 200)
+  }
 
-  let bindEvents = function () {
+  const bindEvents = function () {
     // Remove all events and then reattach them
-    $(".react-contextmenu-wrapper").unbind(".gmcopytrackinfo").bind("contextmenu.gmcopytrackinfo", onContextMenu);
+    $('.react-contextmenu-wrapper').unbind('.gmcopytrackinfo').bind('contextmenu.gmcopytrackinfo', onContextMenu)
+  }
 
-  };
-  
-  window.setTimeout(bindEvents, 500);
+  window.setTimeout(bindEvents, 500)
 
-  window.setInterval(bindEvents, 3000);
-
-})();
+  window.setInterval(bindEvents, 3000)
+})()
