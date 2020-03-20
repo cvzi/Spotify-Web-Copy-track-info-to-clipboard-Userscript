@@ -2,7 +2,7 @@
 // @name          Spotify Web - Copy track info to clipboard
 // @description   Adds an entry in the context menu that copies the selected song name and artist to the clipboard
 // @namespace     https://openuserjs.org/users/cuzi
-// @version       4
+// @version       5
 // @license       MIT
 // @copyright     2017, cuzi (https://openuserjs.org/users/cuzi)
 // @require       https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js
@@ -113,7 +113,7 @@
     let $this = $(this)
 
     const menu = $('.react-contextmenu--visible')
-    const title = $this.find('.tracklist-name')
+    let title = $this.find('.tracklist-name')
     let artist = $this.find('.artists-album span')
     if (artist.length === 0) {
       if ($this.find('.second-line').length !== 0) {
@@ -122,8 +122,9 @@
       if ($this.parents('.now-playing').length !== 0) {
         // Now playing bar
         $this = $($this.parents('.now-playing')[0])
-        if ($this.find('.track-info__artists').length !== 0) {
-          artist = $this.find('.track-info__artists')
+        if ($this.find('.ellipsis-one-line a[href^="/artist/"]').length !== 0) {
+          artist = $this.find('.ellipsis-one-line a[href^="/artist/"]')
+          title = $this.find('a[data-testid="nowplaying-track-link"]')
         }
       }
     }
