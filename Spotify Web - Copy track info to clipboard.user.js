@@ -5,6 +5,7 @@
 // @name:it              Spotify Web - Copia l'informazione sul brano
 // @name:fr              Spotify Web - Copier les informations de titre
 // @name:zh-TW           Spotify Web - 複製歌曲信息
+// @name:zh-CN           Spotify Web - 复制歌曲信息
 // @name:zh              Spotify Web - 复制歌曲信息
 // @name:ar              Spotify Web - انسخ معلومات الأغنية
 // @name:iw              Spotify Web - העתקת מידע השיר
@@ -28,6 +29,7 @@
 // @description:it       Aggiunge una voce nel menu contestuale che copia il nome del brano e l'artista selezionati negli appunti
 // @description:fr       Ajoute une entrée dans le menu contextuel qui copie le nom de la chanson et l'artiste sélectionnés dans le presse-papiers
 // @description:zh-TW    在上下文菜單中添加一個條目，該條目將選定的歌曲名稱和歌手複製到剪貼板
+// @description:zh-CN    在上下文菜单中添加一个条目，将选定的歌曲名称和歌手复制到剪贴板
 // @description:zh       在上下文菜单中添加一个条目，将选定的歌曲名称和歌手复制到剪贴板
 // @description:ar       أضف إدخالاً في قائمة السياق ينسخ اسم الأغنية والفنان المحدد إلى الحافظة
 // @description:iw       הוסף ערך בתפריט ההקשר שמעתיק ללוח הלוח את שם השיר והאמן שנבחרו
