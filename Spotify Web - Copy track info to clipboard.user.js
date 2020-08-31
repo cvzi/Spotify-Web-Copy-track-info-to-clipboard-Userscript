@@ -2,10 +2,11 @@
 // @name          Spotify Web - Copy track info to clipboard
 // @description   Adds an entry in the context menu that copies the selected song name and artist to the clipboard
 // @namespace     https://openuserjs.org/users/cuzi
-// @version       5
+// @icon          https://open.spotify.com/favicon.ico
+// @version       6
 // @license       MIT
 // @copyright     2017, cuzi (https://openuserjs.org/users/cuzi)
-// @require       https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js
+// @require       https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js
 // @grant         GM.setClipboard
 // @grant         GM_setClipboard
 // @include       https://open.spotify.com/*
@@ -45,14 +46,14 @@
   const getSongTitle = function ($titlenodes) {
     let titleText
 
-    if ($titlenodes) {
+    if ($titlenodes && $titlenodes.length > 0) {
       titleText = $titlenodes.text()
       if (titleText && titleText.trim()) {
         return titleText.trim()
       }
     }
 
-    if ($('.track-info__name')) {
+    if ($('.track-info__name').length > 0) {
       titleText = $('.track-info__name')[0].innerText
       if (titleText && titleText.trim()) {
         return titleText.trim()
@@ -65,9 +66,20 @@
   const getArtistName = function ($artistnodes) {
     let artistText
 
+    if (typeof $artistnodes === 'string') {
+      return $artistnodes.trim()
+    }
+
     if ($artistnodes) {
-      artistText = $artistnodes.not((i, e) => e.className).text()
-      if (artistText && artistText.trim()) {
+      const artistTextNodes = $artistnodes.not((i, e) => e.className)
+      if (artistTextNodes.length === 1) {
+        artistText = artistTextNodes.text()
+        if (artistText && artistText.trim()) {
+          return artistText.trim()
+        }
+      } else if (artistTextNodes.length > 1) {
+        artistText = artistTextNodes.map((i, e) => e.textContent.trim()).get()
+        artistText = artistText.join(', ')
         return artistText.trim()
       }
 
@@ -86,20 +98,20 @@
     }
 
     if (document.location.pathname.startsWith('/artist/')) {
-      artistText = $('header h1').text()
+      artistText = $('.content.artist>div h1')[0].textContent
       if (artistText && artistText.trim()) {
         return artistText.trim()
       }
     }
 
     if (document.location.pathname.startsWith('/album/')) {
-      artistText = $('.media-object .mo-meta').text()
+      artistText = document.querySelector('.os-content h1').textContent
       if (artistText && artistText.trim()) {
         return artistText.trim()
       }
     }
 
-    if ($('.track-info__artists')) {
+    if ($('.track-info__artists').length > 0) {
       artistText = $('.track-info__artists')[0].innerText
       if (artistText && artistText.trim()) {
         return artistText.trim()
@@ -127,6 +139,25 @@
           title = $this.find('a[data-testid="nowplaying-track-link"]')
         }
       }
+      const artistGridCell = $this.find('*[role="gridcell"] a[href^="/artist/"]')
+      if (artistGridCell.length > 0) {
+        // New playlist design
+        artist = artistGridCell.parent()
+        title = $(artistGridCell.parent().parent().find('span')[0])
+        if (artist.has(title)) {
+          // title is child of artist, so it's the same node, the real title is somewhere else
+          // This happens on album page
+          if (artist.parent().parent().find('div.standalone-ellipsis-one-line').length) {
+            title = $(artist.parent().parent().find('div.standalone-ellipsis-one-line')[0])
+          }
+        }
+      }
+
+      const artistContent = $('.content.artist>div h1')
+      if (artistContent.length > 0) {
+        // Artist page
+        artist = artistContent[0].textContent
+      }
     }
 
     if (title && artist && menu[0]) {
@@ -139,14 +170,16 @@
 
       // Create context menu entry
       let entry = menu.find('.gmcopytrackinfo')
-      if (!entry[0]) {
+      if (entry.length === 0 || !entry[0]) {
         entry = $('<div class="react-contextmenu-item gmcopytrackinfo" role="menuitem" tabindex="-1" aria-disabled="false">Copy track info</div>').appendTo(menu).click(function (ev) {
           // Copy string to clipboard
           const s = entry.data('gmcopy')
-          if (typeof GM_setClipboard !== 'undefined') {
+          if (typeof GM_setClipboard !== 'undefined') { // eslint-disable-line camelcase
             GM_setClipboard(s)
           } else if (GM.setClipboard) {
             GM.setClipboard(s)
+          } else {
+            navigator.clipboard.writeText(s)
           }
           showInfo('Copied:\n' + s)
           window.dispatchEvent(new window.CustomEvent('REACT_CONTEXTMENU_HIDE'))
@@ -171,5 +204,5 @@
 
   window.setTimeout(bindEvents, 500)
 
-  window.setInterval(bindEvents, 3000)
+  window.setInterval(bindEvents, 1000)
 })()
