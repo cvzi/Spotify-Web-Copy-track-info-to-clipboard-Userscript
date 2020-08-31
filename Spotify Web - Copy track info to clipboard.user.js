@@ -1,9 +1,31 @@
 // ==UserScript==
 // @name          Spotify Web - Copy track info to clipboard
+// @name:es       Spotify Web - Copiar info de la canción
+// @name:pt       Spotify Web - Copiar info da canción
+// @name:it       Spotify Web - Copia l'informazione sul brano
+// @name:fr       Spotify Web - Copier les informations de titre
+// @name:zh-TW    Spotify Web - 複製歌曲信息
+// @name:zh       Spotify Web - 复制歌曲信息
+// @name:ar       Spotify Web - انسخ معلومات الأغنية
+// @name:iw       Spotify Web - העתקת מידע השיר
+// @name:ru       Spotify Web - Копировать данные трека
+// @name:id       Spotify Web - Salin Informasi Lagu
+// @name:ms       Spotify Web - Salin Maklumat Lagu
+// @name:de       Spotify Web - Songinformation kopieren
+// @name:ja       Spotify Web - 曲情報をコピー
+// @name:pl       Spotify Web - Skopiuj informacje o utworze
+// @name:cs       Spotify Web - Kopírovat informace o skladbě
+// @name:el       Spotify Web - Αντιγραφή πληροφοριών τραγουδιού
+// @name:hu       Spotify Web - Dal adat másolása
+// @name:tr       Spotify Web - Şarkı Bilgilerini Kopyala
+// @name:th       Spotify Web - คัดลอกข้อมูลเพลง
+// @name:vi       Spotify Web - Sao chép Thông tin Bài hát
+// @name:sv       Spotify Web - Kopiera sånginfoen
+// @name:nl       Spotify Web - Info van nummer kopiëren
 // @description   Adds an entry in the context menu that copies the selected song name and artist to the clipboard
 // @namespace     https://openuserjs.org/users/cuzi
 // @icon          https://open.spotify.com/favicon.ico
-// @version       6
+// @version       7
 // @license       MIT
 // @copyright     2017, cuzi (https://openuserjs.org/users/cuzi)
 // @require       https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js
@@ -21,6 +43,41 @@
 'use strict';
 
 (function () {
+  const translations = {
+    en: ['Copy track info', 'Copied: %s'],
+    es: ['Copiar info de la canción', 'Copiado: %s'],
+    pt: ['Copiar info da canción', 'Copiado: %s'],
+    it: ['Copia l\'informazione', 'Copiato: %s'],
+    fr: ['Copier les informations de titre', '%s copié'],
+    'zh-HK': ['Copy track info', 'Copied: %s'],
+    'zh-TW': ['複製歌曲信息', '已復制: %s'],
+    zh: ['复制歌曲信息', '已複製: %s'],
+    ar: ['انسخ معلومات الأغنية', '%s :تمّ نسخ'],
+    iw: ['העתקת מידע השיר', '%s :הועתק'],
+    ru: ['Копировать данные трека', 'Скопирована: %s'],
+    id: ['Salin Informasi Lagu', 'Disalin: %s'],
+    ms: ['Salin Maklumat Lagu', 'Disalin: %s'],
+    de: ['Songinformation kopieren', '%s kopiert'],
+    ja: ['曲情報をコピー', '%s をコピーしました'],
+    pl: ['Skopiuj informacje o utworze', '%s skopiowano'],
+    cs: ['Kopírovat informace o skladbě', '%s byl zkopírován'],
+    el: ['Αντιγραφή πληροφοριών τραγουδιού', '%s αντιγράφηκε'],
+    hu: ['Dal adat másolása', '%s másolva'],
+    tr: ['Şarkı Bilgilerini Kopyala', '%s kopyalandı'],
+    th: ['คัดลอกข้อมูลเพลง', '%s ไปที่คลิปบอร์ดแล้ว'],
+    vi: ['Sao chép Thông tin Bài hát', '%s đã được sao chép'],
+    sv: ['Kopiera sånginfoen', '%s kopierad'],
+    nl: ['Info van nummer kopiëren', '%s gekopieerd']
+  }
+  let [menuString, copiedString] = translations.en
+  for (const lang in translations) {
+    if (navigator.language.startsWith(lang)) {
+      [menuString, copiedString] = translations[lang]
+      console.log(lang + ' <- ' + navigator.language)
+      break
+    }
+  }
+
   let showInfoID
   const showInfo = function (str) {
     window.clearTimeout(showInfoID)
@@ -171,7 +228,7 @@
       // Create context menu entry
       let entry = menu.find('.gmcopytrackinfo')
       if (entry.length === 0 || !entry[0]) {
-        entry = $('<div class="react-contextmenu-item gmcopytrackinfo" role="menuitem" tabindex="-1" aria-disabled="false">Copy track info</div>').appendTo(menu).click(function (ev) {
+        entry = $('<div class="react-contextmenu-item gmcopytrackinfo" role="menuitem" tabindex="-1" aria-disabled="false">' + menuString + '</div>').appendTo(menu).click(function (ev) {
           // Copy string to clipboard
           const s = entry.data('gmcopy')
           if (typeof GM_setClipboard !== 'undefined') { // eslint-disable-line camelcase
@@ -181,7 +238,7 @@
           } else {
             navigator.clipboard.writeText(s)
           }
-          showInfo('Copied:\n' + s)
+          showInfo(copiedString.replace('%s', s))
           window.dispatchEvent(new window.CustomEvent('REACT_CONTEXTMENU_HIDE'))
         })
       }
