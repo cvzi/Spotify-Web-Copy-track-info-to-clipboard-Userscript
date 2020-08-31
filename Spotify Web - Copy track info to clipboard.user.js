@@ -1,37 +1,59 @@
 // ==UserScript==
-// @name          Spotify Web - Copy track info to clipboard
-// @name:es       Spotify Web - Copiar info de la canción
-// @name:pt       Spotify Web - Copiar info da canción
-// @name:it       Spotify Web - Copia l'informazione sul brano
-// @name:fr       Spotify Web - Copier les informations de titre
-// @name:zh-TW    Spotify Web - 複製歌曲信息
-// @name:zh       Spotify Web - 复制歌曲信息
-// @name:ar       Spotify Web - انسخ معلومات الأغنية
-// @name:iw       Spotify Web - העתקת מידע השיר
-// @name:ru       Spotify Web - Копировать данные трека
-// @name:id       Spotify Web - Salin Informasi Lagu
-// @name:ms       Spotify Web - Salin Maklumat Lagu
-// @name:de       Spotify Web - Songinformation kopieren
-// @name:ja       Spotify Web - 曲情報をコピー
-// @name:pl       Spotify Web - Skopiuj informacje o utworze
-// @name:cs       Spotify Web - Kopírovat informace o skladbě
-// @name:el       Spotify Web - Αντιγραφή πληροφοριών τραγουδιού
-// @name:hu       Spotify Web - Dal adat másolása
-// @name:tr       Spotify Web - Şarkı Bilgilerini Kopyala
-// @name:th       Spotify Web - คัดลอกข้อมูลเพลง
-// @name:vi       Spotify Web - Sao chép Thông tin Bài hát
-// @name:sv       Spotify Web - Kopiera sånginfoen
-// @name:nl       Spotify Web - Info van nummer kopiëren
-// @description   Adds an entry in the context menu that copies the selected song name and artist to the clipboard
-// @namespace     https://openuserjs.org/users/cuzi
-// @icon          https://open.spotify.com/favicon.ico
-// @version       7
-// @license       MIT
-// @copyright     2017, cuzi (https://openuserjs.org/users/cuzi)
-// @require       https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js
-// @grant         GM.setClipboard
-// @grant         GM_setClipboard
-// @include       https://open.spotify.com/*
+// @name                 Spotify Web - Copy track info to clipboard
+// @name:es              Spotify Web - Copiar info de la canción
+// @name:pt              Spotify Web - Copiar info da canción
+// @name:it              Spotify Web - Copia l'informazione sul brano
+// @name:fr              Spotify Web - Copier les informations de titre
+// @name:zh-TW           Spotify Web - 複製歌曲信息
+// @name:zh              Spotify Web - 复制歌曲信息
+// @name:ar              Spotify Web - انسخ معلومات الأغنية
+// @name:iw              Spotify Web - העתקת מידע השיר
+// @name:ru              Spotify Web - Копировать данные трека
+// @name:id              Spotify Web - Salin Informasi Lagu
+// @name:ms              Spotify Web - Salin Maklumat Lagu
+// @name:de              Spotify Web - Songinformation kopieren
+// @name:ja              Spotify Web - 曲情報をコピー
+// @name:pl              Spotify Web - Skopiuj informacje o utworze
+// @name:cs              Spotify Web - Kopírovat informace o skladbě
+// @name:el              Spotify Web - Αντιγραφή πληροφοριών τραγουδιού
+// @name:hu              Spotify Web - Dal adat másolása
+// @name:tr              Spotify Web - Şarkı Bilgilerini Kopyala
+// @name:th              Spotify Web - คัดลอกข้อมูลเพลง
+// @name:vi              Spotify Web - Sao chép Thông tin Bài hát
+// @name:sv              Spotify Web - Kopiera sånginfoen
+// @name:nl              Spotify Web - Info van nummer kopiëren
+// @description          Adds an entry in the context menu that copies the selected song name and artist to the clipboard
+// @description:es       Agrega una entrada en el menú contextual que copia el nombre de la canción y el artista seleccionados al portapapeles
+// @description:pt       Adiciona uma entrada no menu de contexto que copia o nome da música selecionada e o artista para a área de transferência
+// @description:it       Aggiunge una voce nel menu contestuale che copia il nome del brano e l'artista selezionati negli appunti
+// @description:fr       Ajoute une entrée dans le menu contextuel qui copie le nom de la chanson et l'artiste sélectionnés dans le presse-papiers
+// @description:zh-TW    在上下文菜單中添加一個條目，該條目將選定的歌曲名稱和歌手複製到剪貼板
+// @description:zh       在上下文菜单中添加一个条目，将选定的歌曲名称和歌手复制到剪贴板
+// @description:ar       أضف إدخالاً في قائمة السياق ينسخ اسم الأغنية والفنان المحدد إلى الحافظة
+// @description:iw       הוסף ערך בתפריט ההקשר שמעתיק ללוח הלוח את שם השיר והאמן שנבחרו
+// @description:ru       Добавить пункт контекстного меню, копирующий имя выбранной песни и исполнителя в буфер обмена.
+// @description:id       Tambahkan entri menu konteks yang menyalin nama lagu dan artis yang dipilih ke clipboard
+// @description:ms       Tambahkan entri menu konteks yang menyalin nama lagu dan artis yang dipilih ke papan keratan
+// @description:de       Fügt einen Eintrag im Kontextmenü hinzu, der den ausgewählten Songnamen und Interpreten in die Zwischenablage kopiert
+// @description:ja       選択した曲名とアーティストをクリップボードにコピーするエントリをコンテキストメニューに追加します
+// @description:pl       Dodaje wpis w menu kontekstowym, który kopiuje wybrany tytuł utworu i wykonawcę do schowka
+// @description:cs       Přidá položku do místní nabídky, která zkopíruje název vybrané skladby a umělce do schránky
+// @description:el       Προσθέτει μια καταχώριση στο μενού περιβάλλοντος που αντιγράφει το επιλεγμένο όνομα τραγουδιού και τον καλλιτέχνη στο πρόχειρο
+// @description:hu       Hozzáad egy bejegyzést a helyi menübe, amely átmásolja a kiválasztott dal nevét és előadót a vágólapra
+// @description:tr       Bağlam menüsüne seçili şarkı adını ve sanatçıyı panoya kopyalayan bir giriş ekler
+// @description:th       เพิ่มรายการในเมนูบริบทที่คัดลอกชื่อเพลงและศิลปินที่เลือกไปยังคลิปบอร์ด
+// @description:vi       Thêm một mục vào menu ngữ cảnh để sao chép tên bài hát và nghệ sĩ đã chọn vào khay nhớ tạm
+// @description:sv       Lägger till en post i snabbmenyn som kopierar det valda låtnamnet och artisten till Urklipp
+// @description:nl       Voegt een item toe aan het contextmenu dat de geselecteerde songnaam en artiest naar het klembord kopieert
+// @namespace            https://openuserjs.org/users/cuzi
+// @icon                 https://open.spotify.com/favicon.ico
+// @version              7
+// @license              MIT
+// @copyright            2017, cuzi (https://openuserjs.org/users/cuzi)
+// @require              https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js
+// @grant                GM.setClipboard
+// @grant                GM_setClipboard
+// @include              https://open.spotify.com/*
 // ==/UserScript==
 
 // ==OpenUserJS==
