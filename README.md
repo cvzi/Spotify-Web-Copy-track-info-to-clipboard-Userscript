@@ -15,4 +15,6 @@ General information about userscripts and how to use them can be found at [openu
 [**Click here for install**](https://openuserjs.org/install/cuzi/Spotify_Web_-_Copy_track_info_to_clipboard.user.js)
 
 Screenshot:
+![Animation of Spotify Web Player with context menu](screenshotani.gif)
+
 ![Screenshot of Spotify Web Player with context menu](screenshot.png)
