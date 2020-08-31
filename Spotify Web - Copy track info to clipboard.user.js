@@ -97,7 +97,6 @@
   for (const lang in translations) {
     if (navigator.language.startsWith(lang)) {
       [menuString, copiedString] = translations[lang]
-      console.log(lang + ' <- ' + navigator.language)
       break
     }
   }
