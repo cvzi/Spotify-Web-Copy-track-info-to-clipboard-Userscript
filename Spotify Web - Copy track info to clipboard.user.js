@@ -49,9 +49,9 @@
 // @description:nl       Voegt een item toe aan het contextmenu dat de geselecteerde songnaam en artiest naar het klembord kopieert
 // @namespace            https://openuserjs.org/users/cuzi
 // @icon                 https://open.spotify.com/favicon.ico
-// @version              7
+// @version              8
 // @license              MIT
-// @copyright            2017, cuzi (https://openuserjs.org/users/cuzi)
+// @copyright            2020, cuzi (https://openuserjs.org/users/cuzi)
 // @require              https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js
 // @grant                GM.setClipboard
 // @grant                GM_setClipboard
@@ -97,6 +97,7 @@
   for (const lang in translations) {
     if (navigator.language.startsWith(lang)) {
       [menuString, copiedString] = translations[lang]
+      // console.log(lang + ' <- ' + navigator.language)
       break
     }
   }
@@ -170,6 +171,12 @@
           return artistText.trim()
         }
       }
+      if ($artistnodes.find('.standalone-ellipsis-one-line').length > 0) {
+        artistText = $artistnodes.find('.standalone-ellipsis-one-line')[0].innerText
+        if (artistText && artistText.trim()) {
+          return artistText.trim()
+        }
+      }
 
       // Something else, just accumulate all artist links: <a href="/artist/ARTISTID">Artistname</a>
       if ($artistnodes.find('a[href^="/artist/"]').length > 0) {
@@ -178,9 +185,18 @@
     }
 
     if (document.location.pathname.startsWith('/artist/')) {
-      artistText = $('.content.artist>div h1')[0].textContent
-      if (artistText && artistText.trim()) {
-        return artistText.trim()
+      if ($('.content.artist>div h1').length > 0) {
+        artistText = $('.content.artist>div h1')[0].textContent
+        if (artistText && artistText.trim()) {
+          return artistText.trim()
+        }
+      } else {
+        if ($('.Root__main-view h1').length > 0) {
+          artistText = $('.Root__main-view h1')[0].textContent
+          if (artistText && artistText.trim()) {
+            return artistText.trim()
+          }
+        }
       }
     }
 
@@ -206,6 +222,9 @@
 
     const menu = $('.react-contextmenu--visible')
     let title = $this.find('.tracklist-name')
+    if (title.length === 0) {
+      title = $this.find('div[data-testid="tracklist-row"] .standalone-ellipsis-one-line')
+    }
     let artist = $this.find('.artists-album span')
     if (artist.length === 0) {
       if ($this.find('.second-line').length !== 0) {
