@@ -49,7 +49,7 @@
 // @description:nl       Voegt een item toe aan het contextmenu dat de geselecteerde songnaam en artiest naar het klembord kopieert
 // @namespace            https://openuserjs.org/users/cuzi
 // @icon                 https://open.spotify.com/favicon.ico
-// @version              8
+// @version              9
 // @license              MIT
 // @copyright            2020, cuzi (https://openuserjs.org/users/cuzi)
 // @require              https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js
@@ -106,8 +106,8 @@
   const showInfo = function (str) {
     window.clearTimeout(showInfoID)
     if (!document.getElementById('copied_song_info_outer')) {
-      document.head.appendChild(document.createElement('style')).innerHTML = '#copied_song_info_outer {z-index: 100;height:0;margin: -62px auto 0;padding-bottom: 62px;pointer-events: none;display: inline-block;}#copied_song_info_inner {max-width: none;display: inline-block;background: #2e77d0;border-radius: 8px;box-shadow: 0 4px 12px 4px rgba(0,0,0,.5);color: #fff;font-size: 16px;line-height: 20px;max-width: 450px;opacity: 1;padding: 12px 36px;text-align: center;transition: none .5s cubic-bezier(.3,0,.4,1);transition-property: opacity;}'
-      $('<div id="copied_song_info_outer"><div id="copied_song_info_inner"></div></div>').insertAfter('.Root__main-view>div:first-child')
+      document.head.appendChild(document.createElement('style')).innerHTML = '#copied_song_info_outer {z-index: 20000;height:0;margin: -62px auto 0;padding-bottom: 62px;pointer-events: none;display: inline-block;}#copied_song_info_inner {max-width: none;display: inline-block;background: #2e77d0;border-radius: 8px;box-shadow: 0 4px 12px 4px rgba(0,0,0,.5);color: #fff;font-size: 16px;line-height: 20px;max-width: 450px;opacity: 1;padding: 12px 36px;text-align: center;transition: none .5s cubic-bezier(.3,0,.4,1);transition-property: opacity;}'
+      $('<div id="copied_song_info_outer"><div id="copied_song_info_inner"></div></div>').appendTo('.Root__main-view')
     }
     const copiedSongInfoOuter = $('#copied_song_info_outer')
     const copiedSongInfoInner = $('#copied_song_info_inner')
@@ -220,12 +220,25 @@
   const populateContextMenu = function (ev) {
     let $this = $(this)
 
-    const menu = $('.react-contextmenu--visible')
+    let menu = $('.react-contextmenu--visible')
+    if (!menu[0]) {
+      menu = $('#context-menu-root')
+    }
     let title = $this.find('.tracklist-name')
     if (title.length === 0) {
       title = $this.find('div[data-testid="tracklist-row"] .standalone-ellipsis-one-line')
     }
+    if (title.length === 0) {
+      title = $this.find('div[role="gridcell"] img').parent().find('.standalone-ellipsis-one-line')
+    }
+    if (title.length === 0 && $this.hasClass('now-playing')) {
+      title = $this.find('.ellipsis-one-line>.ellipsis-one-line').eq(0)
+    }
+
     let artist = $this.find('.artists-album span')
+    if (artist.length === 0 && $this.hasClass('now-playing')) {
+      artist = $this.find('.ellipsis-one-line>.ellipsis-one-line').eq(1)
+    }
     if (artist.length === 0) {
       if ($this.find('.second-line').length !== 0) {
         artist = $this.find('.second-line') // in playlist
@@ -262,29 +275,63 @@
     if (title && artist && menu[0]) {
       const titleText = getSongTitle(title)
       const artistText = getArtistName(artist)
-
       if (!titleText || !artistText) {
         return
       }
 
       // Create context menu entry
-      let entry = menu.find('.gmcopytrackinfo')
-      if (entry.length === 0 || !entry[0]) {
-        entry = $('<div class="react-contextmenu-item gmcopytrackinfo" role="menuitem" tabindex="-1" aria-disabled="false">' + menuString + '</div>').appendTo(menu).click(function (ev) {
-          // Copy string to clipboard
-          const s = entry.data('gmcopy')
-          if (typeof GM_setClipboard !== 'undefined') { // eslint-disable-line camelcase
-            GM_setClipboard(s)
-          } else if (GM.setClipboard) {
-            GM.setClipboard(s)
+      if (menu.attr('id') === 'context-menu-root') {
+        // new design (Nov 2020)
+        let entry = menu.find('.gmcopytrackinfo')
+        if (entry.length === 0 || !entry[0]) {
+          let li = menu.find('li')
+          if (li.length > 4) {
+            li = $(li[4])
           } else {
-            navigator.clipboard.writeText(s)
+            li = $(li[0])
           }
-          showInfo(copiedString.replace('%s', s))
-          window.dispatchEvent(new window.CustomEvent('REACT_CONTEXTMENU_HIDE'))
-        })
+          entry = $('<li role="presentation"><button role="menuitem" tabindex="-1"><span as="span" dir="auto">' + menuString + '</span></button></li>')
+            .appendTo(li)
+            .click(function (ev) {
+              // Copy string to clipboard
+              const s = entry.data('gmcopy')
+              if (typeof GM_setClipboard !== 'undefined') { // eslint-disable-line camelcase
+                GM_setClipboard(s)
+              } else if (GM.setClipboard) {
+                GM.setClipboard(s)
+              } else {
+                navigator.clipboard.writeText(s)
+              }
+              showInfo(copiedString.replace('%s', s))
+              menu.parent().remove()
+            })
+            // Copy classes from an existing entry
+          entry.addClass('gmcopytrackinfo')
+          entry.addClass(li.attr('class'))
+          entry.find('button').addClass(li.find('button').attr('class'))
+          entry.find('button span').addClass(li.find('button span').attr('class'))
+        }
+        entry.data('gmcopy', artistText + ' - ' + titleText)
+      } else {
+        // old design
+        let entry = menu.find('.gmcopytrackinfo')
+        if (entry.length === 0 || !entry[0]) {
+          entry = $('<div class="react-contextmenu-item gmcopytrackinfo" role="menuitem" tabindex="-1" aria-disabled="false">' + menuString + '</div>').appendTo(menu).click(function (ev) {
+            // Copy string to clipboard
+            const s = entry.data('gmcopy')
+            if (typeof GM_setClipboard !== 'undefined') { // eslint-disable-line camelcase
+              GM_setClipboard(s)
+            } else if (GM.setClipboard) {
+              GM.setClipboard(s)
+            } else {
+              navigator.clipboard.writeText(s)
+            }
+            showInfo(copiedString.replace('%s', s))
+            window.dispatchEvent(new window.CustomEvent('REACT_CONTEXTMENU_HIDE'))
+          })
+        }
+        entry.data('gmcopy', artistText + ' - ' + titleText)
       }
-      entry.data('gmcopy', artistText + ' - ' + titleText)
     }
   }
 
@@ -298,7 +345,13 @@
 
   const bindEvents = function () {
     // Remove all events and then reattach them
-    $('.react-contextmenu-wrapper').unbind('.gmcopytrackinfo').bind('contextmenu.gmcopytrackinfo', onContextMenu)
+    if ($('.react-contextmenu-wrapper').length > 0) {
+      // old design
+      $('.react-contextmenu-wrapper').unbind('.gmcopytrackinfo').bind('contextmenu.gmcopytrackinfo', onContextMenu)
+    } else {
+      // new design (Nov 2020)
+      $('*[data-testid="tracklist-row"],.now-playing').unbind('.gmcopytrackinfo').bind('contextmenu.gmcopytrackinfo', onContextMenu)
+    }
   }
 
   window.setTimeout(bindEvents, 500)
