@@ -49,10 +49,10 @@
 // @description:nl       Voegt een item toe aan het contextmenu dat de geselecteerde songnaam en artiest naar het klembord kopieert
 // @namespace            https://openuserjs.org/users/cuzi
 // @icon                 https://open.spotify.com/favicon.ico
-// @version              9
+// @version              10
 // @license              MIT
 // @copyright            2020, cuzi (https://openuserjs.org/users/cuzi)
-// @require              https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js
+// @require              https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js
 // @grant                GM.setClipboard
 // @grant                GM_setClipboard
 // @include              https://open.spotify.com/*
@@ -218,12 +218,17 @@
   }
 
   const populateContextMenu = function (ev) {
+    console.debug('populateContextMenu')
     let $this = $(this)
 
     let menu = $('.react-contextmenu--visible')
     if (!menu[0]) {
       menu = $('#context-menu-root')
     }
+    if (!menu[0]) {
+      menu = $('#context-menu')
+    }
+
     let title = $this.find('.tracklist-name')
     if (title.length === 0) {
       title = $this.find('div[data-testid="tracklist-row"] .standalone-ellipsis-one-line')
@@ -234,10 +239,13 @@
     if (title.length === 0 && $this.hasClass('now-playing')) {
       title = $this.find('.ellipsis-one-line>.ellipsis-one-line').eq(0)
     }
-
     let artist = $this.find('.artists-album span')
     if (artist.length === 0 && $this.hasClass('now-playing')) {
       artist = $this.find('.ellipsis-one-line>.ellipsis-one-line').eq(1)
+    }
+    if (artist.length === 0 && title.length === 0 && $this.find('[data-testid="nowplaying-track-link"]')) {
+      title = $this.find('[data-testid="nowplaying-track-link"]')
+      artist = $this.find('[data-testid="nowplaying-artist"]')
     }
     if (artist.length === 0) {
       if ($this.find('.second-line').length !== 0) {
@@ -280,7 +288,7 @@
       }
 
       // Create context menu entry
-      if (menu.attr('id') === 'context-menu-root') {
+      if (menu.attr('id').startsWith('context-menu')) {
         // new design (Nov 2020)
         let entry = menu.find('.gmcopytrackinfo')
         if (entry.length === 0 || !entry[0]) {
@@ -350,7 +358,7 @@
       $('.react-contextmenu-wrapper').unbind('.gmcopytrackinfo').bind('contextmenu.gmcopytrackinfo', onContextMenu)
     } else {
       // new design (Nov 2020)
-      $('*[data-testid="tracklist-row"],.now-playing').unbind('.gmcopytrackinfo').bind('contextmenu.gmcopytrackinfo', onContextMenu)
+      $('*[data-testid="tracklist-row"],.now-playing,*[data-testid="now-playing-widget"]').unbind('.gmcopytrackinfo').bind('contextmenu.gmcopytrackinfo', onContextMenu)
     }
   }
 
