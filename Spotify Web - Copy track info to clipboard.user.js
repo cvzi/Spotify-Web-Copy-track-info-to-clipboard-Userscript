@@ -49,7 +49,7 @@
 // @description:nl       Voegt een item toe aan het contextmenu dat de geselecteerde songnaam en artiest naar het klembord kopieert
 // @namespace            https://openuserjs.org/users/cuzi
 // @icon                 https://open.spotify.com/favicon.ico
-// @version              11
+// @version              12
 // @license              MIT
 // @copyright            2020, cuzi (https://openuserjs.org/users/cuzi)
 // @require              https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js
@@ -262,9 +262,9 @@
       if ($this.parents('.Root__now-playing-bar').length !== 0) {
         // New: Now playing bar 2021-09
         $this = $($this.parents('.Root__now-playing-bar')[0])
-        if ($this.find('.ellipsis-one-line a[href^="/artist/"]').length !== 0) {
-          artist = $this.find('.ellipsis-one-line a[href^="/artist/"]')
-          title = $this.find('.ellipsis-one-line a[href^="/album/"],.ellipsis-one-line a[href^="/track/"]')
+        if ($this.find('.ellipsis-one-line a[href^="/artist/"],.standalone-ellipsis-one-line a[href^="/artist/"]').length !== 0) {
+          artist = $this.find('.ellipsis-one-line a[href^="/artist/"],.standalone-ellipsis-one-line a[href^="/artist/"]')
+          title = $this.find('.ellipsis-one-line a[href^="/album/"],.ellipsis-one-line a[href^="/track/"],.standalone-ellipsis-one-line a[href^="/album/"],.standalone-ellipsis-one-line a[href^="/track/"]')
         }
       }
 
