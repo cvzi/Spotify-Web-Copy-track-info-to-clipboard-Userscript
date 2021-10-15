@@ -49,7 +49,7 @@
 // @description:nl       Voegt een item toe aan het contextmenu dat de geselecteerde songnaam en artiest naar het klembord kopieert
 // @namespace            https://openuserjs.org/users/cuzi
 // @icon                 https://open.spotify.com/favicon.ico
-// @version              12
+// @version              13
 // @license              MIT
 // @copyright            2020, cuzi (https://openuserjs.org/users/cuzi)
 // @require              https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js
@@ -265,6 +265,12 @@
         if ($this.find('.ellipsis-one-line a[href^="/artist/"],.standalone-ellipsis-one-line a[href^="/artist/"]').length !== 0) {
           artist = $this.find('.ellipsis-one-line a[href^="/artist/"],.standalone-ellipsis-one-line a[href^="/artist/"]')
           title = $this.find('.ellipsis-one-line a[href^="/album/"],.ellipsis-one-line a[href^="/track/"],.standalone-ellipsis-one-line a[href^="/album/"],.standalone-ellipsis-one-line a[href^="/track/"]')
+        } else if ($this.find('[data-testid="context-item-info-artist"]').length !== 0) {
+          artist = $this.find('a[data-testid="context-item-info-artist"][href^="/artist/"],[data-testid="context-item-info-artist"] a[href^="/artist/"]')
+          title = $this.find('[data-testid="context-item-info-title"] a[href^="/album/"],[data-testid="context-item-info-title"] a[href^="/track/"]')
+        } else if ($this.find('a[href^="/artist/"],a[href^="/album/"],a[href^="/track/"]').length > 1) {
+          artist = $this.find('a[href^="/artist/"]')
+          title = $this.find('a[href^="/album/"],a[href^="/track/"]')
         }
       }
 
