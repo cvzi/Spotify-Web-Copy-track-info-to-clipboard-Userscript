@@ -12,7 +12,7 @@ or
 [FireMonkey ![Firefox logo](https://raw.githubusercontent.com/OpenUserJS/OpenUserJS.org/master/public/images/ua/firefox16.png)](https://addons.mozilla.org/en-US/firefox/addon/firemonkey/).
 General information about userscripts and how to use them can be found at [openuserjs.org/about/Userscript-Beginners-HOWTO](https://openuserjs.org/about/Userscript-Beginners-HOWTO).
 
-[**Click here for install**](https://openuserjs.org/install/cuzi/Spotify_Web_-_Copy_track_info_to_clipboard.user.js)
+[**Click here for install**](https://greasyfork.org/scripts/36788-spotify-web-copy-track-info-to-clipboard/code/Spotify%20Web%20-%20Copy%20track%20info%20to%20clipboard.user.js)
 
 Screenshot:
 
