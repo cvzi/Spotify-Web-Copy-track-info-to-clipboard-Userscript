@@ -49,13 +49,14 @@
 // @description:nl       Voegt een item toe aan het contextmenu dat de geselecteerde songnaam en artiest naar het klembord kopieert
 // @namespace            https://openuserjs.org/users/cuzi
 // @icon                 https://open.spotify.com/favicon.ico
-// @version              13
+// @version              14
 // @license              MIT
 // @copyright            2020, cuzi (https://openuserjs.org/users/cuzi)
 // @require              https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js
 // @grant                GM.setClipboard
 // @grant                GM_setClipboard
 // @include              https://open.spotify.com/*
+// @sandbox              JavaScript
 // ==/UserScript==
 
 // ==OpenUserJS==
