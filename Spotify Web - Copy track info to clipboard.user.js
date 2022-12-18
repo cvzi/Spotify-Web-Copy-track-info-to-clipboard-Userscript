@@ -49,13 +49,13 @@
 // @description:nl       Voegt een item toe aan het contextmenu dat de geselecteerde songnaam en artiest naar het klembord kopieert
 // @namespace            https://openuserjs.org/users/cuzi
 // @icon                 https://open.spotify.com/favicon.ico
-// @version              14
+// @version              15
 // @license              MIT
 // @copyright            2020, cuzi (https://openuserjs.org/users/cuzi)
 // @require              https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js
 // @grant                GM.setClipboard
 // @grant                GM_setClipboard
-// @include              https://open.spotify.com/*
+// @match                https://open.spotify.com/*
 // @sandbox              JavaScript
 // ==/UserScript==
 
@@ -367,6 +367,15 @@
     }, 200)
   }
 
+  let lastNode = null
+  const searchForOpenContextMenu = function () {
+    const node = document.querySelector('[data-context-menu-open]')
+    if (node && node !== lastNode) {
+      lastNode = node
+      populateContextMenu.call(node, null)
+    }
+  }
+
   const bindEvents = function () {
     // Remove all events and then reattach them
     if ($('.react-contextmenu-wrapper').length > 0) {
@@ -381,4 +390,19 @@
   window.setTimeout(bindEvents, 500)
 
   window.setInterval(bindEvents, 1000)
+
+  let searchIv = window.setInterval(searchForOpenContextMenu, 50)
+
+  document.addEventListener('visibilitychange', function () {
+    clearInterval(searchIv)
+    if (!document.hidden) {
+      searchIv = window.setInterval(searchForOpenContextMenu, 50)
+    }
+  })
+  document.addEventListener('focus', function () {
+    clearInterval(searchIv)
+    if (!document.hidden) {
+      searchIv = window.setInterval(searchForOpenContextMenu, 50)
+    }
+  })
 })()
