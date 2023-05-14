@@ -49,7 +49,7 @@
 // @description:nl       Voegt een item toe aan het contextmenu dat de geselecteerde songnaam en artiest naar het klembord kopieert
 // @namespace            https://openuserjs.org/users/cuzi
 // @icon                 https://open.spotify.com/favicon.ico
-// @version              15
+// @version              16
 // @license              MIT
 // @copyright            2020, cuzi (https://openuserjs.org/users/cuzi)
 // @require              https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js
@@ -107,18 +107,61 @@
   const showInfo = function (str) {
     window.clearTimeout(showInfoID)
     if (!document.getElementById('copied_song_info_outer')) {
-      document.head.appendChild(document.createElement('style')).innerHTML = '#copied_song_info_outer {z-index: 20000;height:0;margin: -62px auto 0;padding-bottom: 62px;pointer-events: none;display: inline-block;}#copied_song_info_inner {max-width: none;display: inline-block;background: #2e77d0;border-radius: 8px;box-shadow: 0 4px 12px 4px rgba(0,0,0,.5);color: #fff;font-size: 16px;line-height: 20px;max-width: 450px;opacity: 1;padding: 12px 36px;text-align: center;transition: none .5s cubic-bezier(.3,0,.4,1);transition-property: opacity;}'
-      $('<div id="copied_song_info_outer"><div id="copied_song_info_inner"></div></div>').appendTo('.Root__main-view')
+      document.head.appendChild(document.createElement('style')).innerHTML = `
+
+      #copied_song_info_outer {
+        margin: -32px calc(var(--panel-gap)*-1) 0;
+        display: grid;
+        grid-area: 1/1/now-playing-bar-start/-1;
+        pointer-events: none;
+        position: relative;
+        z-index: 5;
+      }
+
+      #copied_song_info_inner {
+        margin-bottom: 16px;
+        place-self: end center;
+        pointer-events: none;
+        z-index: 100;
+      }
+
+      #copied_song_info_text {
+        background: #2e77d0;
+        border-radius: 8px;
+        -webkit-box-shadow: 0 4px 12px 4px rgba(0,0,0,.5);
+        box-shadow: 0 4px 12px 4px rgba(0,0,0,.5);
+        color: #fff;
+        display: inline-block;
+        font-size: 16px;
+        line-height: 20px;
+        max-width: 450px;
+        padding: 12px 36px;
+        text-align: center;
+        -webkit-transition: none .5s cubic-bezier(.3,0,.4,1);
+        transition: none .5s cubic-bezier(.3,0,.4,1);
+        transition-property: none;
+        -webkit-transition-property: opacity;
+        transition-property: opacity;
+      }
+      `
+
+      const node = $('<div id="copied_song_info_outer"><div id="copied_song_info_inner"><div id="copied_song_info_text"></div></div></div>')
+
+      if ($('.Root__now-playing-bar')) {
+        $('.Root__now-playing-bar').after(node)
+      } else {
+        node.appendTo('.Root')
+      }
     }
     const copiedSongInfoOuter = $('#copied_song_info_outer')
-    const copiedSongInfoInner = $('#copied_song_info_inner')
+    const copiedSongInfoText = $('#copied_song_info_text')
 
-    copiedSongInfoOuter.css('display', 'inline-block')
-    copiedSongInfoInner.css('opacity', 1)
-    copiedSongInfoInner.html(str.replace('\n', '<br>\n'))
+    copiedSongInfoOuter.css('display', 'grid')
+    copiedSongInfoText.css('opacity', 1)
+    copiedSongInfoText.html(str.replace('\n', '<br>\n'))
 
     showInfoID = window.setTimeout(function () {
-      copiedSongInfoInner.css('opacity', 0)
+      copiedSongInfoText.css('opacity', 0)
       showInfoID = window.setTimeout(function () {
         copiedSongInfoOuter.css('display', 'none')
       }, 700)
@@ -192,8 +235,8 @@
           return artistText.trim()
         }
       } else {
-        if ($('.Root__main-view h1').length > 0) {
-          artistText = $('.Root__main-view h1')[0].textContent
+        if ($('.Root h1').length > 0) {
+          artistText = $('.Root h1')[0].textContent
           if (artistText && artistText.trim()) {
             return artistText.trim()
           }
@@ -326,8 +369,8 @@
               } else {
                 navigator.clipboard.writeText(s)
               }
-              showInfo(copiedString.replace('%s', s))
               menu.parent().remove()
+              showInfo(copiedString.replace('%s', s))
             })
             // Copy classes from an existing entry
           entry.addClass('gmcopytrackinfo')
@@ -350,8 +393,8 @@
             } else {
               navigator.clipboard.writeText(s)
             }
-            showInfo(copiedString.replace('%s', s))
             window.dispatchEvent(new window.CustomEvent('REACT_CONTEXTMENU_HIDE'))
+            showInfo(copiedString.replace('%s', s))
           })
         }
         entry.data('gmcopy', artistText + ' - ' + titleText)
