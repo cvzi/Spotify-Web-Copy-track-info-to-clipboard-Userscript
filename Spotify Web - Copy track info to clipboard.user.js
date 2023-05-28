@@ -49,7 +49,7 @@
 // @description:nl       Voegt een item toe aan het contextmenu dat de geselecteerde songnaam en artiest naar het klembord kopieert
 // @namespace            https://openuserjs.org/users/cuzi
 // @icon                 https://open.spotify.com/favicon.ico
-// @version              16
+// @version              17
 // @license              MIT
 // @copyright            2020, cuzi (https://openuserjs.org/users/cuzi)
 // @require              https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js
@@ -147,8 +147,8 @@
 
       const node = $('<div id="copied_song_info_outer"><div id="copied_song_info_inner"><div id="copied_song_info_text"></div></div></div>')
 
-      if ($('.Root__now-playing-bar')) {
-        $('.Root__now-playing-bar').after(node)
+      if (document.querySelector('.Root footer')) {
+        $('.Root footer').after(node)
       } else {
         node.appendTo('.Root')
       }
@@ -303,9 +303,9 @@
           title = $this.find('a[data-testid="nowplaying-track-link"]')
         }
       }
-      if ($this.parents('.Root__now-playing-bar').length !== 0) {
+      if ($this.parents('.Root footer').length !== 0) {
         // New: Now playing bar 2021-09
-        $this = $($this.parents('.Root__now-playing-bar')[0])
+        $this = $($this.parents('.Root footer')[0])
         if ($this.find('.ellipsis-one-line a[href^="/artist/"],.standalone-ellipsis-one-line a[href^="/artist/"]').length !== 0) {
           artist = $this.find('.ellipsis-one-line a[href^="/artist/"],.standalone-ellipsis-one-line a[href^="/artist/"]')
           title = $this.find('.ellipsis-one-line a[href^="/album/"],.ellipsis-one-line a[href^="/track/"],.standalone-ellipsis-one-line a[href^="/album/"],.standalone-ellipsis-one-line a[href^="/track/"]')
