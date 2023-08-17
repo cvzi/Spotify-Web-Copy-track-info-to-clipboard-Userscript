@@ -49,7 +49,7 @@
 // @description:nl       Voegt een item toe aan het contextmenu dat de geselecteerde songnaam en artiest naar het klembord kopieert
 // @namespace            https://openuserjs.org/users/cuzi
 // @icon                 https://open.spotify.com/favicon.ico
-// @version              19
+// @version              20
 // @license              MIT
 // @copyright            2020, cuzi (https://openuserjs.org/users/cuzi)
 // @require              https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js
@@ -69,7 +69,6 @@
 
 (function () {
   const translations = {
-    en: ['Copy track info', 'Copied: %s'],
     es: ['Copiar info de la canción', 'Copiado: %s'],
     pt: ['Copiar info da canción', 'Copiado: %s'],
     it: ['Copia l\'informazione', 'Copiato: %s'],
@@ -92,14 +91,20 @@
     th: ['คัดลอกข้อมูลเพลง', '%s ไปที่คลิปบอร์ดแล้ว'],
     vi: ['Sao chép Thông tin Bài hát', '%s đã được sao chép'],
     sv: ['Kopiera sånginfoen', '%s kopierad'],
-    nl: ['Info van nummer kopiëren', '%s gekopieerd']
+    nl: ['Info van nummer kopiëren', '%s gekopieerd'],
+    en: ['Copy track info', 'Copied: %s']
   }
   let [menuString, copiedString] = translations.en
-  for (const lang in translations) {
-    if (navigator.language.startsWith(lang)) {
-      [menuString, copiedString] = translations[lang]
-      // console.log(lang + ' <- ' + navigator.language)
-      break
+
+  const htmlTag = document.querySelector('html[lang]')
+  if (htmlTag && htmlTag.lang !== 'en' && htmlTag.lang in translations) {
+    [menuString, copiedString] = translations[htmlTag.lang]
+  } else {
+    for (const lang in translations) {
+      if (navigator.language.startsWith(lang)) {
+        [menuString, copiedString] = translations[lang]
+        break
+      }
     }
   }
 
@@ -223,8 +228,8 @@
       }
 
       // Something else, just accumulate all artist links: <a href="/artist/ARTISTID">Artistname</a>
-      if ($artistnodes.find('a[href^="/artist/"]').length > 0) {
-        return $.map($artistnodes.find('a[href^="/artist/"]'), (element) => $(element).text().trim()).join(', ')
+      if ($artistnodes.find('a[href*="/artist/"]').length > 0) {
+        return $.map($artistnodes.find('a[href*="/artist/"]'), (element) => $(element).text().trim()).join(', ')
       }
     }
 
@@ -298,27 +303,27 @@
       if ($this.parents('.now-playing').length !== 0) {
         // Now playing bar
         $this = $($this.parents('.now-playing')[0])
-        if ($this.find('.ellipsis-one-line a[href^="/artist/"]').length !== 0) {
-          artist = $this.find('.ellipsis-one-line a[href^="/artist/"]')
+        if ($this.find('.ellipsis-one-line a[href*="/artist/"]').length !== 0) {
+          artist = $this.find('.ellipsis-one-line a[href*="/artist/"]')
           title = $this.find('a[data-testid="nowplaying-track-link"]')
         }
       }
       if ($this.parents('.Root footer').length !== 0) {
         // New: Now playing bar 2021-09
         $this = $($this.parents('.Root footer')[0])
-        if ($this.find('.ellipsis-one-line a[href^="/artist/"],.standalone-ellipsis-one-line a[href^="/artist/"]').length !== 0) {
-          artist = $this.find('.ellipsis-one-line a[href^="/artist/"],.standalone-ellipsis-one-line a[href^="/artist/"]')
-          title = $this.find('.ellipsis-one-line a[href^="/album/"],.ellipsis-one-line a[href^="/track/"],.standalone-ellipsis-one-line a[href^="/album/"],.standalone-ellipsis-one-line a[href^="/track/"]')
+        if ($this.find('.ellipsis-one-line a[href*="/artist/"],.standalone-ellipsis-one-line a[href*="/artist/"]').length !== 0) {
+          artist = $this.find('.ellipsis-one-line a[href*="/artist/"],.standalone-ellipsis-one-line a[href*="/artist/"]')
+          title = $this.find('.ellipsis-one-line a[href*="/album/"],.ellipsis-one-line a[href*="/track/"],.standalone-ellipsis-one-line a[href*="/album/"],.standalone-ellipsis-one-line a[href*="/track/"]')
         } else if ($this.find('[data-testid="context-item-info-artist"]').length !== 0) {
-          artist = $this.find('a[data-testid="context-item-info-artist"][href^="/artist/"],[data-testid="context-item-info-artist"] a[href^="/artist/"]')
-          title = $this.find('[data-testid="context-item-info-title"] a[href^="/album/"],[data-testid="context-item-info-title"] a[href^="/track/"]')
-        } else if ($this.find('a[href^="/artist/"],a[href^="/album/"],a[href^="/track/"]').length > 1) {
-          artist = $this.find('a[href^="/artist/"]')
-          title = $this.find('a[href^="/album/"],a[href^="/track/"]')
+          artist = $this.find('a[data-testid="context-item-info-artist"][href*="/artist/"],[data-testid="context-item-info-artist"] a[href*="/artist/"]')
+          title = $this.find('[data-testid="context-item-info-title"] a[href*="/album/"],[data-testid="context-item-info-title"] a[href*="/track/"]')
+        } else if ($this.find('a[href*="/artist/"],a[href*="/album/"],a[href*="/track/"]').length > 1) {
+          artist = $this.find('a[href*="/artist/"]')
+          title = $this.find('a[href*="/album/"],a[href*="/track/"]')
         }
       }
 
-      const artistGridCell = $this.find('*[role="gridcell"] a[href^="/artist/"]')
+      const artistGridCell = $this.find('*[role="gridcell"] a[href*="/artist/"]')
       if (artistGridCell.length > 0) {
         // New playlist design
         artist = artistGridCell.parent()
