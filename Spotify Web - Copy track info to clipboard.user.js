@@ -342,6 +342,11 @@
         // Artist page
         artist = artistContent[0].textContent
       }
+      const artistPageH1 = $('main>section[data-testid="artist-page"] .contentSpacing h1')
+      if (artistPageH1.length > 0) {
+        // Artist page
+        artist = artistPageH1[0].textContent
+      }
     }
 
     if (artist.length === 0 && document.location.pathname.startsWith('/track/')) {
