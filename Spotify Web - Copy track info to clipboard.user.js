@@ -49,10 +49,10 @@
 // @description:nl       Voegt een item toe aan het contextmenu dat de geselecteerde songnaam en artiest naar het klembord kopieert
 // @namespace            https://openuserjs.org/users/cuzi
 // @icon                 https://open.spotify.com/favicon.ico
-// @version              20
+// @version              21
 // @license              MIT
 // @copyright            2020, cuzi (https://openuserjs.org/users/cuzi)
-// @require              https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js
+// @require              https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js
 // @grant                GM.setClipboard
 // @grant                GM_setClipboard
 // @match                https://open.spotify.com/*
@@ -73,7 +73,7 @@
     pt: ['Copiar info da canción', 'Copiado: %s'],
     it: ['Copia l\'informazione', 'Copiato: %s'],
     fr: ['Copier les informations de titre', '%s copié'],
-    'zh-HK': ['Copy track info', 'Copied: %s'],
+    'zh-HK': ['複製歌曲信息', '已復制: %s'],
     'zh-TW': ['複製歌曲信息', '已復制: %s'],
     zh: ['复制歌曲信息', '已複製: %s'],
     ar: ['انسخ معلومات الأغنية', '%s :تمّ نسخ'],
@@ -369,7 +369,13 @@
         if (liButton.length > 4) {
           li = $(liButton[4]).parent()
         }
-        entry = $('<li role="presentation"><button role="menuitem" tabindex="-1"><span as="span" dir="auto">' + menuString + '</span></button></li>')
+        entry = $(`
+        <li role="presentation">
+          <button role="menuitem" tabindex="-1">
+            <div style="filter: grayscale(100%);font-size: 1.2rem;padding: 0px;margin: 0px 0px 0px -0.5rem;">🍝</div>
+            <span as="span" dir="auto">${menuString}</span>
+          </button>
+        </li>`)
           .appendTo(li.parent())
           .click(function (ev) {
             // Copy string to clipboard
