@@ -64,6 +64,7 @@
 // ==/OpenUserJS==
 
 /* globals $, GM, GM_setClipboard */
+/* jshint asi: true, esversion: 8 */
 
 'use strict';
 
