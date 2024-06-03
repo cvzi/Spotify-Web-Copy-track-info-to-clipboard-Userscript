@@ -49,7 +49,7 @@
 // @description:nl       Voegt een item toe aan het contextmenu dat de geselecteerde songnaam en artiest naar het klembord kopieert
 // @namespace            https://openuserjs.org/users/cuzi
 // @icon                 https://open.spotify.com/favicon.ico
-// @version              21
+// @version              22
 // @license              MIT
 // @copyright            2020, cuzi (https://openuserjs.org/users/cuzi)
 // @require              https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js
@@ -398,6 +398,7 @@
         entry.find('button span').attr('class', li.find('button span').attr('class'))
       }
       entry.data('gmcopy', artistText + ' - ' + titleText)
+      menu.css('margin-top', '-26px')
     }
   }
 
