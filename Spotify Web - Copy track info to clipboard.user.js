@@ -49,7 +49,7 @@
 // @description:nl       Voegt een item toe aan het contextmenu dat de geselecteerde songnaam en artiest naar het klembord kopieert
 // @namespace            https://openuserjs.org/users/cuzi
 // @icon                 https://open.spotify.com/favicon.ico
-// @version              22
+// @version              23
 // @license              MIT
 // @copyright            2020, cuzi (https://openuserjs.org/users/cuzi)
 // @require              https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js
@@ -241,8 +241,8 @@
           return artistText.trim()
         }
       } else {
-        if ($('.Root h1').length > 0) {
-          artistText = $('.Root h1')[0].textContent
+        if ($('.Root main .contentSpacing [data-testid="adaptiveEntityTitle"]').length > 0) {
+          artistText = $('.Root main .contentSpacing [data-testid="adaptiveEntityTitle"]')[0].textContent
           if (artistText && artistText.trim()) {
             return artistText.trim()
           }
