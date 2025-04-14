@@ -49,7 +49,7 @@
 // @description:nl       Voegt een item toe aan het contextmenu dat de geselecteerde songnaam en artiest naar het klembord kopieert
 // @namespace            https://openuserjs.org/users/cuzi
 // @icon                 https://open.spotify.com/favicon.ico
-// @version              23
+// @version              24
 // @license              MIT
 // @copyright            2020, cuzi (https://openuserjs.org/users/cuzi)
 // @require              https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js
@@ -98,7 +98,7 @@
   let [menuString, copiedString] = translations.en
 
   const htmlTag = document.querySelector('html[lang]')
-  if (htmlTag && htmlTag.lang !== 'en' && htmlTag.lang in translations) {
+  if (htmlTag && htmlTag.lang in translations) {
     [menuString, copiedString] = translations[htmlTag.lang]
   } else {
     for (const lang in translations) {
@@ -107,6 +107,20 @@
         break
       }
     }
+  }
+
+  function makeInfoSelectable () {
+    // Make some headings, like album title selectable
+
+    const makeSelectable = (node) => {
+      node.style.userSelect = 'all'
+    }
+
+    // Artist page -> artist title:
+    document.querySelectorAll('.main-view-container [data-testid="adaptiveEntityTitle"], .main-view-container [data-encore-id="adaptiveTitle"]').forEach(makeSelectable)
+
+    // Album page -> album title and track page -> track title
+    document.querySelectorAll('.main-view-container [data-testid="entityTitle"] h1').forEach(makeSelectable)
   }
 
   let showInfoID
@@ -267,68 +281,63 @@
     return ''
   }
 
-  const populateContextMenu = function (ev) {
-    console.debug('populateContextMenu')
-    let $this = $(this)
-
-    let menu = $('.react-contextmenu--visible')
-    if (!menu[0]) {
-      menu = $('#context-menu-root')
-    }
-    if (!menu[0]) {
-      menu = $('#context-menu')
-    }
-
-    let title = $this.find('.tracklist-name')
-    if (title.length === 0) {
-      title = $this.find('div[data-testid="tracklist-row"] .standalone-ellipsis-one-line')
+  const findSongInfo = function ($row) {
+    console.debug('findSongInfo for', $row[0])
+    let title = $row.find('.tracklist-name')
+    if (title.length === 0 && $row.find('a[href*="/track/"]').length > 0) {
+      title = $($row.find('a[href*="/track/"]')[0])
     }
     if (title.length === 0) {
-      title = $this.find('div[role="gridcell"] img').parent().find('.standalone-ellipsis-one-line')
+      title = $row.find('div[data-testid="tracklist-row"] .standalone-ellipsis-one-line')
     }
-    if (title.length === 0 && $this.hasClass('now-playing')) {
-      title = $this.find('.ellipsis-one-line>.ellipsis-one-line').eq(0)
+    if (title.length === 0) {
+      title = $row.find('div[role="gridcell"] img').parent().find('.standalone-ellipsis-one-line')
     }
-    let artist = $this.find('.artists-album span')
-    if (artist.length === 0 && $this.hasClass('now-playing')) {
-      artist = $this.find('.ellipsis-one-line>.ellipsis-one-line').eq(1)
+    if (title.length === 0 && $row.hasClass('now-playing')) {
+      title = $row.find('.ellipsis-one-line>.ellipsis-one-line').eq(0)
     }
-    if (artist.length === 0 && title.length === 0 && $this.find('[data-testid="nowplaying-track-link"]')) {
-      title = $this.find('[data-testid="nowplaying-track-link"]')
-      artist = $this.find('[data-testid="nowplaying-artist"]')
+    let artist = $row.find('.artists-album span')
+    if (artist.length === 0 && $row.hasClass('now-playing')) {
+      artist = $row.find('.ellipsis-one-line>.ellipsis-one-line').eq(1)
+    }
+    if (artist.length === 0 && title.length === 0 && $row.find('[data-testid="nowplaying-track-link"]')) {
+      title = $row.find('[data-testid="nowplaying-track-link"]')
+      artist = $row.find('[data-testid="nowplaying-artist"]')
     }
     if (artist.length === 0) {
-      if ($this.find('.second-line').length !== 0) {
-        artist = $this.find('.second-line') // in playlist
+      if ($row.find('.second-line').length !== 0) {
+        artist = $row.find('.second-line') // in playlist
       }
-      if ($this.parents('.now-playing').length !== 0) {
+      if ($row.parents('.now-playing').length !== 0) {
         // Now playing bar
-        $this = $($this.parents('.now-playing')[0])
-        if ($this.find('.ellipsis-one-line a[href*="/artist/"]').length !== 0) {
-          artist = $this.find('.ellipsis-one-line a[href*="/artist/"]')
-          title = $this.find('a[data-testid="nowplaying-track-link"]')
+        $row = $($row.parents('.now-playing')[0])
+        if ($row.find('.ellipsis-one-line a[href*="/artist/"]').length !== 0) {
+          artist = $row.find('.ellipsis-one-line a[href*="/artist/"]')
+          title = $row.find('a[data-testid="nowplaying-track-link"]')
         }
       }
-      if ($this.parents('.Root footer').length !== 0) {
+      if ($row.parents('.Root footer').length !== 0) {
         // New: Now playing bar 2021-09
-        $this = $($this.parents('.Root footer')[0])
-        if ($this.find('.ellipsis-one-line a[href*="/artist/"],.standalone-ellipsis-one-line a[href*="/artist/"]').length !== 0) {
-          artist = $this.find('.ellipsis-one-line a[href*="/artist/"],.standalone-ellipsis-one-line a[href*="/artist/"]')
-          title = $this.find('.ellipsis-one-line a[href*="/album/"],.ellipsis-one-line a[href*="/track/"],.standalone-ellipsis-one-line a[href*="/album/"],.standalone-ellipsis-one-line a[href*="/track/"]')
-        } else if ($this.find('[data-testid="context-item-info-artist"]').length !== 0) {
-          artist = $this.find('a[data-testid="context-item-info-artist"][href*="/artist/"],[data-testid="context-item-info-artist"] a[href*="/artist/"]')
-          title = $this.find('[data-testid="context-item-info-title"] a[href*="/album/"],[data-testid="context-item-info-title"] a[href*="/track/"]')
-        } else if ($this.find('a[href*="/artist/"],a[href*="/album/"],a[href*="/track/"]').length > 1) {
-          artist = $this.find('a[href*="/artist/"]')
-          title = $this.find('a[href*="/album/"],a[href*="/track/"]')
+        $row = $($row.parents('.Root footer')[0])
+        if ($row.find('.ellipsis-one-line a[href*="/artist/"],.standalone-ellipsis-one-line a[href*="/artist/"]').length !== 0) {
+          artist = $row.find('.ellipsis-one-line a[href*="/artist/"],.standalone-ellipsis-one-line a[href*="/artist/"]')
+          title = $row.find('.ellipsis-one-line a[href*="/album/"],.ellipsis-one-line a[href*="/track/"],.standalone-ellipsis-one-line a[href*="/album/"],.standalone-ellipsis-one-line a[href*="/track/"]')
+        } else if ($row.find('[data-testid="context-item-info-artist"]').length !== 0) {
+          artist = $row.find('a[data-testid="context-item-info-artist"][href*="/artist/"],[data-testid="context-item-info-artist"] a[href*="/artist/"]')
+          title = $row.find('[data-testid="context-item-info-title"] a[href*="/album/"],[data-testid="context-item-info-title"] a[href*="/track/"]')
+        } else if ($row.find('a[href*="/artist/"],a[href*="/album/"],a[href*="/track/"]').length > 1) {
+          artist = $row.find('a[href*="/artist/"]')
+          title = $row.find('a[href*="/album/"],a[href*="/track/"]')
         }
       }
 
-      const artistGridCell = $this.find('*[role="gridcell"] a[href*="/artist/"]')
+      const artistGridCell = $row.find('*[role="gridcell"] a[href*="/artist/"]')
       if (artistGridCell.length > 0) {
         // New playlist design
         artist = artistGridCell.parent()
-        title = $(artistGridCell.parent().parent().find('span')[0])
+        if (title.length === 0) {
+          title = $(artistGridCell.parent().parent().find('span')[0])
+        }
         if (artist.has(title)) {
           // title is child of artist, so it's the same node, the real title is somewhere else
           // This happens on album page
@@ -343,10 +352,10 @@
         // Artist page
         artist = artistContent[0].textContent
       }
-      const artistPageH1 = $('main>section[data-testid="artist-page"] .contentSpacing h1')
-      if (artistPageH1.length > 0) {
+      const artistPageHeader = $('main>section[data-testid="artist-page"] [data-testid="adaptiveEntityTitle"]')
+      if (artistPageHeader.length > 0) {
         // Artist page
-        artist = artistPageH1[0].textContent
+        artist = artistPageHeader[0].textContent
       }
     }
 
@@ -355,13 +364,51 @@
       artist = $('section [data-testid="creator-link"][href*="/artist/"]')
     }
 
-    if (title && artist && menu[0]) {
+    if (title && artist) {
       const titleText = getSongTitle(title)
       const artistText = getArtistName(artist)
-      if (!titleText || !artistText) {
-        return
-      }
 
+      if (titleText && artistText) {
+        return artistText + ' - ' + titleText
+      }
+    }
+
+    return null
+  }
+
+  const populateContextMenu = function (ev) {
+    console.debug('populateContextMenu')
+    const $this = $(this)
+
+    let prettyString = null
+
+    if (document.querySelectorAll('.main-view-container [role="row"][aria-selected="true"]').length > 1) {
+      // Multiple tracks selected
+      $('.main-view-container [role="row"][aria-selected="true"]').each(function () {
+        const songInfo = findSongInfo($(this))
+        if (songInfo) {
+          if (prettyString) {
+            prettyString += '\n'
+          } else {
+            prettyString = ''
+          }
+          prettyString += songInfo
+        }
+      })
+    } else {
+      // Single track
+      prettyString = findSongInfo($this)
+    }
+
+    let menu = $('.react-contextmenu--visible')
+    if (!menu[0]) {
+      menu = $('#context-menu-root')
+    }
+    if (!menu[0]) {
+      menu = $('#context-menu')
+    }
+
+    if (prettyString && menu[0]) {
       // Create context menu entry
       let entry = menu.find('.gmcopytrackinfo')
       if (entry.length === 0 || !entry[0]) {
@@ -374,7 +421,7 @@
         <li role="presentation">
           <button role="menuitem" tabindex="-1">
             <div style="filter: grayscale(100%);font-size: 1.2rem;padding: 0px;margin: 0px 0px 0px -0.5rem;">🍝</div>
-            <span as="span" dir="auto">${menuString}</span>
+            <span as="span" dir="auto" style="flex:1">${menuString}</span>
           </button>
         </li>`)
           .appendTo(li.parent())
@@ -389,7 +436,11 @@
               navigator.clipboard.writeText(s)
             }
             menu.parent().remove()
-            showInfo(copiedString.replace('%s', s))
+            let infoString = s
+            if (s.split('\n').length > 2) {
+              infoString = s.split('\n').slice(0, 2).join('\n') + '\n...'
+            }
+            showInfo(copiedString.replace('%s', infoString))
           })
         // Copy classes from an existing entry
         entry.attr('class', li.attr('class'))
@@ -397,7 +448,7 @@
         entry.find('button').attr('class', li.find('button').attr('class'))
         entry.find('button span').attr('class', li.find('button span').attr('class'))
       }
-      entry.data('gmcopy', artistText + ' - ' + titleText)
+      entry.data('gmcopy', prettyString)
       menu.css('margin-top', '-26px')
     }
   }
@@ -417,6 +468,8 @@
       lastNode = node
       populateContextMenu.call(node, null)
     }
+
+    makeInfoSelectable()
   }
 
   const bindEvents = function () {
