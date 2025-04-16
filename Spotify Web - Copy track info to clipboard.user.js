@@ -49,7 +49,7 @@
 // @description:nl       Voegt een item toe aan het contextmenu dat de geselecteerde songnaam en artiest naar het klembord kopieert
 // @namespace            https://openuserjs.org/users/cuzi
 // @icon                 https://open.spotify.com/favicon.ico
-// @version              24
+// @version              25
 // @license              MIT
 // @copyright            2020, cuzi (https://openuserjs.org/users/cuzi)
 // @require              https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js
@@ -63,7 +63,7 @@
 // @author       cuzi
 // ==/OpenUserJS==
 
-/* globals $, GM, GM_setClipboard */
+/* globals $, GM, GM_setClipboard, MouseEvent */
 /* jshint asi: true, esversion: 8 */
 
 'use strict';
@@ -107,20 +107,6 @@
         break
       }
     }
-  }
-
-  function makeInfoSelectable () {
-    // Make some headings, like album title selectable
-
-    const makeSelectable = (node) => {
-      node.style.userSelect = 'all'
-    }
-
-    // Artist page -> artist title:
-    document.querySelectorAll('.main-view-container [data-testid="adaptiveEntityTitle"], .main-view-container [data-encore-id="adaptiveTitle"]').forEach(makeSelectable)
-
-    // Album page -> album title and track page -> track title
-    document.querySelectorAll('.main-view-container [data-testid="entityTitle"] h1').forEach(makeSelectable)
   }
 
   let showInfoID
@@ -442,6 +428,16 @@
             }
             showInfo(copiedString.replace('%s', infoString))
           })
+          .mouseenter(function () {
+            // Find the buttons that are currently not expanded
+            const buttons = Array.from(document.querySelectorAll('#context-menu button[role=menuitem]:not([aria-expanded])'))
+            // Remove the ones that are inside a submenu
+            const buttonsFirstLevel = buttons.filter(button => $(button).parents('ul').length === 1)
+            if (buttonsFirstLevel.length > 0) {
+              // Fire mouseover event on the first button to close the other submenus
+              buttonsFirstLevel[0].dispatchEvent(new MouseEvent('mouseover', { bubbles: true }))
+            }
+          })
         // Copy classes from an existing entry
         entry.attr('class', li.attr('class'))
         entry.addClass('gmcopytrackinfo')
@@ -468,8 +464,6 @@
       lastNode = node
       populateContextMenu.call(node, null)
     }
-
-    makeInfoSelectable()
   }
 
   const bindEvents = function () {
