@@ -49,7 +49,7 @@
 // @description:nl       Voegt een item toe aan het contextmenu dat de geselecteerde songnaam en artiest naar het klembord kopieert
 // @namespace            https://openuserjs.org/users/cuzi
 // @icon                 https://open.spotify.com/favicon.ico
-// @version              25
+// @version              26
 // @license              MIT
 // @copyright            2020, cuzi (https://openuserjs.org/users/cuzi)
 // @require              https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js
@@ -153,8 +153,8 @@
 
       const node = $('<div id="copied_song_info_outer"><div id="copied_song_info_inner"><div id="copied_song_info_text"></div></div></div>')
 
-      if (document.querySelector('.Root footer')) {
-        $('.Root footer').parent().after(node)
+      if (document.querySelector('.Root [data-testid="now-playing-bar"]')) {
+        $('.Root [data-testid="now-playing-bar"]').parent().after(node)
       } else {
         node.appendTo('.Root')
       }
@@ -268,7 +268,7 @@
   }
 
   const findSongInfo = function ($row) {
-    console.debug('findSongInfo for', $row[0])
+    console.debug('findSongInfo for row', $row[0])
     let title = $row.find('.tracklist-name')
     if (title.length === 0 && $row.find('a[href*="/track/"]').length > 0) {
       title = $($row.find('a[href*="/track/"]')[0])
@@ -302,9 +302,9 @@
           title = $row.find('a[data-testid="nowplaying-track-link"]')
         }
       }
-      if ($row.parents('.Root footer').length !== 0) {
+      if ($row.parents('.Root [data-testid="now-playing-bar"]').length !== 0) {
         // New: Now playing bar 2021-09
-        $row = $($row.parents('.Root footer')[0])
+        $row = $($row.parents('.Root [data-testid="now-playing-bar"]')[0])
         if ($row.find('.ellipsis-one-line a[href*="/artist/"],.standalone-ellipsis-one-line a[href*="/artist/"]').length !== 0) {
           artist = $row.find('.ellipsis-one-line a[href*="/artist/"],.standalone-ellipsis-one-line a[href*="/artist/"]')
           title = $row.find('.ellipsis-one-line a[href*="/album/"],.ellipsis-one-line a[href*="/track/"],.standalone-ellipsis-one-line a[href*="/album/"],.standalone-ellipsis-one-line a[href*="/track/"]')
@@ -315,6 +315,19 @@
           artist = $row.find('a[href*="/artist/"]')
           title = $row.find('a[href*="/album/"],a[href*="/track/"]')
         }
+      }
+
+      if (artist.length === 0 && $row.find('[class*="ListRowTitle__ListRowText"]').length !== 0) {
+        // "Now playing view", the next in queue item
+        title = $row.find('[class*="ListRowTitle__ListRowText"]')
+        artist = $row.find('[class*="ListRowDetails__ListRowDetailText"]')
+      }
+
+      if (artist.length === 0 && $row.parents('[data-testid="NPV_Panel_OpenDiv"]').length !== 0) {
+        // "Now playing view", the current playing item
+        $row = $($row.parents('[data-testid="NPV_Panel_OpenDiv"]')[0]).find('[data-testid="minimized-track-visual-enhancement"]').parent()
+        artist = $row.find('a[data-testid="context-item-info-artist"][href*="/artist/"],[data-testid="context-item-info-artist"] a[href*="/artist/"]')
+        title = $row.find('[data-testid="context-item-info-title"] a[href*="/album/"],[data-testid="context-item-info-title"] a[href*="/track/"]')
       }
 
       const artistGridCell = $row.find('*[role="gridcell"] a[href*="/artist/"]')
